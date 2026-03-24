@@ -54,19 +54,21 @@ export const login = async (req, res) => {
     },
   });
 
-  res.cookie("dev_access_token", accessToken, {
-    httpOnly: true,
-    secure: true,
-    sameSite: "none",
-  });
+const isProd = process.env.NODE_ENV === "production";
 
-  res.cookie("dev_refresh_token", refreshToken, {
-    httpOnly: true,
-    secure: true,
-    sameSite: "none",
-  });
+res.cookie("dev_access_token", accessToken, {
+  httpOnly: true,
+  secure: isProd,
+  sameSite: isProd ? "none" : "lax",
+});
 
-  res.json({
+res.cookie("dev_refresh_token", refreshToken, {
+  httpOnly: true,
+  secure: isProd,
+  sameSite: isProd ? "none" : "lax",
+});
+
+res.json({
     message: "Logged in successfully",
     developer: { id: developer.id, email: developer.email },
   });
