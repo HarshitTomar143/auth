@@ -8,30 +8,41 @@ datasource db {
 }
 
 model Application {
-  id             String   @id @default(uuid())
-  name           String
-  clientId       String   @unique
-  clientSecret   String
-  redirectUrl    String
-  createdAt      DateTime @default(now())
+  id           String   @id @default(uuid())
+  name         String
+  clientId     String   @unique
+  clientSecret String
+  redirectUrl  String
+  createdAt    DateTime @default(now())
 
-  users          User[]
+  ownerId String
+  owner   User   @relation("UserOwnedApps", fields: [ownerId], references: [id])
+
+  googleClientId     String?
+  googleClientSecret String?
+  googleRedirectUri  String?
+
+  githubClientId     String?
+  githubClientSecret String?
+  githubRedirectUri  String?
+
+  users User[] @relation("AppUsers")
 }
 
 model User {
-  id           String   @id @default(uuid())
-  email        String
-  password     String?
-  provider     String   // local, google, github
-  providerId   String?
-  createdAt    DateTime @default(now())
+  id         String   @id @default(uuid())
+  email      String
+  password   String?
+  provider   String
+  providerId String?
+  createdAt  DateTime @default(now())
 
-  appId        String
-  application  Application @relation(fields: [appId], references: [id])
+  appId       String
+  application Application @relation("AppUsers", fields: [appId], references: [id])
 
   refreshTokens RefreshToken[]
 
-  @@unique([email, appId]) // same email allowed in different apps
+  ownedApps Application[] @relation("UserOwnedApps")
 }
 
 model RefreshToken {

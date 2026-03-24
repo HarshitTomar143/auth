@@ -31,10 +31,7 @@ export const verifyAuth = async (req, res, next) => {
     return res.status(401).json({ message: "No refresh token" });
   }
 
-  if (storedToken.expiresAt < new Date()) {
-    return res.status(403).json({ message: "Refresh token expired" });
-    }
-
+ 
   try {
     const decoded = jwt.verify(
       refreshToken,
@@ -46,10 +43,15 @@ export const verifyAuth = async (req, res, next) => {
       where: { token: refreshToken },
     });
 
+    
+    
     if (!storedToken) {
-      return res.status(403).json({ message: "Invalid refresh token" });
+        return res.status(403).json({ message: "Invalid refresh token" });
     }
-
+    
+    if (storedToken.expiresAt < new Date()) {
+   return res.status(403).json({ message: "Refresh token expired" });
+   }
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
     });
