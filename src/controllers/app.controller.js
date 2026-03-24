@@ -105,6 +105,7 @@ export const updateProviders = async (req, res) => {
   const updated = await prisma.application.update({
     where: { id },
     data: {
+      ...(redirectUrl && { redirectUrl }),
       ...(googleClientId && { googleClientId }),
       ...(googleClientSecret && { googleClientSecret }),
       ...(googleRedirectUri && { googleRedirectUri }),
