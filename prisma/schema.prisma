@@ -7,6 +7,17 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Developer {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+
+  apps Application[]
+
+  refreshTokens DeveloperRefreshToken[]
+}
+
 model Application {
   id           String   @id @default(uuid())
   name         String
@@ -15,8 +26,8 @@ model Application {
   redirectUrl  String
   createdAt    DateTime @default(now())
 
-  ownerId String
-  owner   User   @relation("UserOwnedApps", fields: [ownerId], references: [id])
+  developerId String
+  developer   Developer @relation(fields: [developerId], references: [id])
 
   googleClientId     String?
   googleClientSecret String?
@@ -41,8 +52,6 @@ model User {
   application Application @relation("AppUsers", fields: [appId], references: [id])
 
   refreshTokens RefreshToken[]
-
-  ownedApps Application[] @relation("UserOwnedApps")
 }
 
 model RefreshToken {
@@ -52,4 +61,13 @@ model RefreshToken {
   user      User     @relation(fields: [userId], references: [id])
   expiresAt DateTime
   createdAt DateTime @default(now())
+}
+
+model DeveloperRefreshToken {
+  id          String    @id @default(uuid())
+  token       String    @unique
+  developerId String
+  developer   Developer @relation(fields: [developerId], references: [id])
+  expiresAt   DateTime
+  createdAt   DateTime  @default(now())
 }
