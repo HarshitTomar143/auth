@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken"
 
 export const generateAccessToken = (user) => {
   return jwt.sign(
-    { userId: user.id, appId: user.app_id },
+    { userId: user.id, appId: user.appId },
     process.env.ACCESS_TOKEN_SECRET,
     { expiresIn: "15m" }
   );
