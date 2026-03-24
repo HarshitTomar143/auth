@@ -273,15 +273,14 @@ export const githubLogin = async (req, res) => {
     return res.status(400).json({ message: "GitHub not configured" });
   }
 
-  const redirectUri = app.githubRedirectUri;
+  const params = new URLSearchParams({
+    client_id: app.githubClientId.trim(),
+    redirect_uri: app.githubRedirectUri.trim(),
+    scope: "user:email",
+    state: clientId,
+  });
 
-  const url =
-    "https://github.com/login/oauth/authorize?" +
-    `client_id=${app.githubClientId}` +
-    `&redirect_uri=${redirectUri}` +
-    `&scope=user:email` +
-    `&state=${clientId}`;
-
+  const url = `https://github.com/login/oauth/authorize?${params}`;
   res.redirect(url);
 };
 
@@ -304,10 +303,10 @@ export const githubCallback = async (req, res) => {
   const tokenRes = await axios.post(
     "https://github.com/login/oauth/access_token",
     {
-      client_id: app.githubClientId,
-      client_secret: app.githubClientSecret,
-      code,
-      redirect_uri: redirectUri,
+      client_id: app.githubClientId.trim(),        // ← add .trim()
+    client_secret: app.githubClientSecret.trim(), // ← add .trim()
+    code,
+    redirect_uri: app.githubRedirectUri.trim(),
     },
     {
       headers: {
