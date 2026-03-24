@@ -158,15 +158,15 @@ export const googleLogin = async (req, res) => {
 
   const redirectUri = app.googleRedirectUri;
 
-  const url =
-    "https://accounts.google.com/o/oauth2/v2/auth?" +
-    `client_id=${app.googleClientId}` +
-    `&redirect_uri=${redirectUri}` +
-    `&response_type=code` +
-    `&scope=openid email profile` +
-    `&state=${clientId}`;
+ const url =
+  "https://accounts.google.com/o/oauth2/v2/auth?" +
+  `client_id=${app.googleClientId.trim()}` +       // ← .trim()
+  `&redirect_uri=${encodeURIComponent(redirectUri.trim())}` +  // ← encode + trim
+  `&response_type=code` +
+  `&scope=openid%20email%20profile` +              // ← encode spaces in scope
+  `&state=${clientId}`;
 
-  res.redirect(url);
+res.redirect(url);
 };
 
 export const googleCallback = async (req, res) => {
@@ -193,9 +193,9 @@ export const googleCallback = async (req, res) => {
     "https://oauth2.googleapis.com/token",
     {
       code,
-      client_id: app.googleClientId,
-      client_secret: app.googleClientSecret,
-      redirect_uri: redirectUri,
+      client_id: app.googleClientId.trim(),
+      client_secret: app.googleClientSecret.trim(),
+      redirect_uri: redirectUri.trim(),
       grant_type: "authorization_code",
     }
   );
