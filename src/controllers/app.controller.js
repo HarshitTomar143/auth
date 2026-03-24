@@ -82,49 +82,55 @@ export const getApp = async (req, res) => {
 };
 
 export const updateProviders = async (req, res) => {
-  const { id } = req.params;
-  const {
-    googleClientId,
-    googleClientSecret,
-    googleRedirectUri,
-    githubClientId,
-    githubClientSecret,
-    githubRedirectUri,
-  } = req.body;
+  try {
+    const { id } = req.params;
+    const {
+      redirectUrl,
+      googleClientId,
+      googleClientSecret,
+      googleRedirectUri,
+      githubClientId,
+      githubClientSecret,
+      githubRedirectUri,
+    } = req.body;
 
-  const app = await prisma.application.findUnique({ where: { id } });
+    const app = await prisma.application.findUnique({ where: { id } });
 
-  if (!app) {
-    return res.status(404).json({ message: "Application not found" });
+    if (!app) {
+      return res.status(404).json({ message: "Application not found" });
+    }
+
+    if (app.developerId !== req.developer.userId) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+
+    const updated = await prisma.application.update({
+      where: { id },
+      data: {
+        ...(redirectUrl && { redirectUrl }),
+        ...(googleClientId && { googleClientId }),
+        ...(googleClientSecret && { googleClientSecret }),
+        ...(googleRedirectUri && { googleRedirectUri }),
+        ...(githubClientId && { githubClientId }),
+        ...(githubClientSecret && { githubClientSecret }),
+        ...(githubRedirectUri && { githubRedirectUri }),
+      },
+    });
+
+    return res.status(200).json({
+      message: "Providers updated",
+      app: {
+        id: updated.id,
+        googleClientId: updated.googleClientId,
+        googleRedirectUri: updated.googleRedirectUri,
+        githubClientId: updated.githubClientId,
+        githubRedirectUri: updated.githubRedirectUri,
+      },
+    });
+  } catch (err) {
+    console.error("Update providers error:", err);
+    return res.status(500).json({ message: err.message });
   }
-
-  if (app.developerId !== req.developer.userId) {
-    return res.status(403).json({ message: "Forbidden" });
-  }
-
-  const updated = await prisma.application.update({
-    where: { id },
-    data: {
-      ...(redirectUrl && { redirectUrl }),
-      ...(googleClientId && { googleClientId }),
-      ...(googleClientSecret && { googleClientSecret }),
-      ...(googleRedirectUri && { googleRedirectUri }),
-      ...(githubClientId && { githubClientId }),
-      ...(githubClientSecret && { githubClientSecret }),
-      ...(githubRedirectUri && { githubRedirectUri }),
-    },
-  });
-
-  res.json({
-    message: "Providers updated",
-    app: {
-      id: updated.id,
-      googleClientId: updated.googleClientId,
-      googleRedirectUri: updated.googleRedirectUri,
-      githubClientId: updated.githubClientId,
-      githubRedirectUri: updated.githubRedirectUri,
-    },
-  });
 };
 
 export const deleteApp = async (req, res) => {
