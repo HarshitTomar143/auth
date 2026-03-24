@@ -178,6 +178,10 @@ export const googleCallback = async (req, res) => {
     where: { clientId },
   });
 
+  console.log("App found:", app);
+  console.log("googleClientId:", app?.googleClientId);
+  console.log("googleRedirectUri:", app?.googleRedirectUri);
+
   if (!app) {
     return res.status(400).json({ message: "Invalid app" });
   }
@@ -244,13 +248,13 @@ export const googleCallback = async (req, res) => {
 
   res.cookie("access_token", accessToken, {
     httpOnly: true,
-    secure: false,
+    secure: isProd,
     sameSite: isProd ? "none" : "lax",
   });
 
   res.cookie("refresh_token", refreshToken, {
     httpOnly: true,
-    secure: false,
+    secure: isProd,
     sameSite: "none",
   });
 
